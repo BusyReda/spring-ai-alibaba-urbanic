@@ -18,7 +18,7 @@ GptRepo Document Reader 是一个专门用于读取和处理 Git 仓库内容的
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>gpt-repo-document-reader</artifactId>
     <version>${version}</version>
 </dependency>

@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.alibaba.cloud.ai</groupId>
+        <groupId>com.mayfair.infra</groupId>
         <artifactId>spring-ai-alibaba</artifactId>
         <version>${revision}</version>
         <relativePath>../../pom.xml</relativePath>
@@ -19,7 +19,7 @@
 
     <properties>
         <spring-ai.version>1.0.0</spring-ai.version>
-        <spring-ai-alibaba.version>1.0.0.1</spring-ai-alibaba.version>
+        <spring-ai-alibaba.version>${project.version}</spring-ai-alibaba.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,7 +27,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-nl2sql-common</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -112,7 +112,7 @@
             <version>42.4.1</version>
         </dependency>
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-core</artifactId>
             <version>${spring-ai-alibaba.version}</version>
         </dependency>

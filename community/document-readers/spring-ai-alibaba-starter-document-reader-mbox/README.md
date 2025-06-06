@@ -44,7 +44,7 @@ Add the following dependency to your project / 在项目中添加以下依赖：
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>spring-ai-mbox-document-reader</artifactId>
     <version>${version}</version>
 </dependency>

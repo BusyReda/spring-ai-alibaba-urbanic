@@ -24,7 +24,7 @@ ChatGPT Data Document Reader is a document reader for loading and processing exp
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>chatgpt-data-document-reader</artifactId>
     <version>${version}</version>
 </dependency>

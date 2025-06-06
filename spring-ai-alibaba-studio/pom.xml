@@ -19,7 +19,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.alibaba.cloud.ai</groupId>
+        <groupId>com.mayfair.infra</groupId>
         <artifactId>spring-ai-alibaba</artifactId>
         <version>${revision}</version>
         <relativePath>../pom.xml</relativePath>
@@ -50,7 +50,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -61,7 +61,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-graph-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -152,7 +152,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-autoconfigure-dashscope</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

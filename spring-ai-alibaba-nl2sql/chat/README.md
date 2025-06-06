@@ -52,7 +52,7 @@
 #### Maven 示例：
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>nl2sql-service</artifactId>
     <version>1.0-SNAPSHOT</version>
 </dependency>

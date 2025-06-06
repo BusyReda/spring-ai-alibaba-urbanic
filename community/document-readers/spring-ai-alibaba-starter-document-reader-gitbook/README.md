@@ -18,7 +18,7 @@ Add the following dependency to your `pom.xml` file:
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>gitbook-document-reader</artifactId>
     <version>${version}</version>
 </dependency>

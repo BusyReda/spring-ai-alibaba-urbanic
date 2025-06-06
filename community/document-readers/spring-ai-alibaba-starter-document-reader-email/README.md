@@ -18,7 +18,7 @@ A Spring AI document reader implementation for parsing email files (EML format).
 <dependencies>
     <!-- Spring AI Document Reader API -->
     <dependency>
-        <groupId>com.alibaba.cloud.ai</groupId>
+        <groupId>com.mayfair.infra</groupId>
         <artifactId>email-document-reader</artifactId>
     </dependency>
 </dependencies>

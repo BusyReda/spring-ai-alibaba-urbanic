@@ -19,7 +19,7 @@ This module provides a document reader implementation for Elasticsearch, allowin
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>es-document-reader</artifactId>
     <version>${version}</version>
 </dependency>

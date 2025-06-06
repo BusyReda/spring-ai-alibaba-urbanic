@@ -10,7 +10,7 @@ Because Spring AI Alibaba is developed based on Spring Boot 3.x, it requires JDK
 Add 'spring-ai-alibaba-starter' dependency to your project.
 
 <dependency>
-	<groupId>com.alibaba.cloud.ai</groupId>
+	<groupId>com.mayfair.infra</groupId>
 	<artifactId>spring-ai-alibaba-starter</artifactId>
 	<version>1.0.0-M3.2</version>
 </dependency>

@@ -3,9 +3,9 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>spring-ai-alibaba-deepresearch</artifactId>
-    <version>0.1.0</version>
+    <version>1.0.0.1-Urbanic-SNAPSHOT</version>
     <name>Spring AI Alibaba Deep Research</name>
 
     <properties>
@@ -23,7 +23,7 @@
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
 
         <spring-ai.version>1.0.0</spring-ai.version>
-        <spring-ai-alibaba.version>1.0.0.1</spring-ai-alibaba.version>
+        <spring-ai-alibaba.version>1.0.0.1-Urbanic-SNAPSHOT</spring-ai-alibaba.version>
     </properties>
 
 
@@ -40,7 +40,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-graph-core</artifactId>
         </dependency>
 
@@ -60,7 +60,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-starter-tool-calling-tavilysearch</artifactId>
         </dependency>
         
@@ -88,7 +88,7 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>com.alibaba.cloud.ai</groupId>
+                <groupId>com.mayfair.infra</groupId>
                 <artifactId>spring-ai-alibaba-bom</artifactId>
                 <version>${spring-ai-alibaba.version}</version>
                 <type>pom</type>

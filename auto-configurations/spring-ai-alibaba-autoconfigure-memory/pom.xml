@@ -18,7 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.alibaba.cloud.ai</groupId>
+        <groupId>com.mayfair.infra</groupId>
         <artifactId>spring-ai-alibaba</artifactId>
         <version>${revision}</version>
         <relativePath>../../pom.xml</relativePath>
@@ -37,7 +37,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-core</artifactId>
             <version>${revision}</version>
         </dependency>
@@ -78,7 +78,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-starter-memory-jdbc</artifactId>
             <version>${revision}</version>
             <optional>true</optional>
@@ -92,7 +92,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-starter-memory-redis</artifactId>
             <version>${revision}</version>
             <optional>true</optional>
@@ -105,7 +105,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-starter-memory-elasticsearch</artifactId>
             <version>${revision}</version>
             <optional>true</optional>

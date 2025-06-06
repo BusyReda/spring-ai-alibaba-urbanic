@@ -16,7 +16,7 @@ HuggingFace文件系统文档阅读器是一个专门用于读取和解析Huggin
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>huggingface-fs-document-reader</artifactId>
     <version>${version}</version>
 </dependency>

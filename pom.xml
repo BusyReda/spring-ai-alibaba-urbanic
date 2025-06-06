@@ -16,7 +16,7 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>spring-ai-alibaba</artifactId>
     <version>${revision}</version>
 
@@ -177,11 +177,21 @@
         <system>Github Actions</system>
         <url>https://github.com/alibaba/spring-ai-alibaba/actions</url>
     </ciManagement>
+    <distributionManagement>
+        <repository>
+            <id>nexus-releases</id>
+            <url>https://nexus.mayfair-inc.com/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus-snapshots</id>
+            <url>https://nexus.mayfair-inc.com/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <properties>
 
         <!-- Spring AI Alibaba Version -->
-        <revision>1.0.0.1</revision>
+        <revision>1.0.0.1-Urbanic-SNAPSHOT</revision>
 
         <!-- Maven project basic config -->
         <java.version>17</java.version>

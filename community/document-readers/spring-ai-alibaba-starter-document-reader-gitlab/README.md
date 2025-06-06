@@ -114,7 +114,7 @@ Add the following dependency to your project:
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>gitlab-document-reader</artifactId>
     <version>${spring-ai-alibaba.version}</version>
 </dependency>
@@ -246,7 +246,7 @@ List<Document> documents = reader.setRef("main")
 
 ```xml
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>gitlab-document-reader</artifactId>
     <version>${spring-ai-alibaba.version}</version>
 </dependency>

@@ -26,7 +26,7 @@ Overall, it takes only two steps to turn your Spring Boot application into an in
 
    ```xml
    <dependency>
-        <groupId>com.alibaba.cloud.ai</groupId>
+        <groupId>com.mayfair.infra</groupId>
         <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
         <version>1.0.0.1</version>
    </dependency>

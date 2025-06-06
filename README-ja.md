@@ -24,7 +24,7 @@ Spring AI Alibaba を使用して生成的 AI を Spring Boot
  ```xml
 
 <dependency>
-    <groupId>com.alibaba.cloud.ai</groupId>
+    <groupId>com.mayfair.infra</groupId>
     <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
     <version>1.0.0</version>
 </dependency>
