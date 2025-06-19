@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mayfair.infra</groupId>
     <artifactId>spring-ai-alibaba-deepresearch</artifactId>
-    <version>1.0.0.1-Urbanic-SNAPSHOT</version>
+    <version>1.0.0.1-Urbanic</version>
     <name>Spring AI Alibaba Deep Research</name>
 
     <properties>
@@ -23,7 +23,7 @@
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
 
         <spring-ai.version>1.0.0</spring-ai.version>
-        <spring-ai-alibaba.version>1.0.0.1-Urbanic-SNAPSHOT</spring-ai-alibaba.version>
+        <spring-ai-alibaba.version>1.0.0.1-Urbanic</spring-ai-alibaba.version>
     </properties>
 
 
