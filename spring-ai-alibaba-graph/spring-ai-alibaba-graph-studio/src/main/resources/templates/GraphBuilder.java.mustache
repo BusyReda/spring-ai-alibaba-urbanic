@@ -1,9 +1,18 @@
-package {{packageName}};
+package {{packageName}}.graph;
 
+import com.alibaba.cloud.ai.graph.CompiledGraph;
+import com.alibaba.cloud.ai.graph.KeyStrategy;
+import com.alibaba.cloud.ai.graph.StateGraph;
 import com.alibaba.cloud.ai.graph.action.AsyncNodeAction;
-import com.alibaba.cloud.ai.graph.node.LlmNode;
+import com.alibaba.cloud.ai.graph.exception.GraphStateException;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.alibaba.cloud.ai.graph.StateGraph.END;
 import static com.alibaba.cloud.ai.graph.StateGraph.START;
@@ -12,21 +21,14 @@ import static com.alibaba.cloud.ai.graph.StateGraph.START;
 public class GraphBuilder {
 
     @Bean
-    public CompiledGraph buildGraph() throws GraphStateException {
-        OverAllState overAllState = new OverAllState();
-        // build state
-        // overAllState.registerKeyAndStrategy("prompt", (o, o2) -> o2);
-        {{stateSection}}
+    public CompiledGraph buildGraph(ChatModel chatModel) throws GraphStateException {
+        ChatClient chatClient = ChatClient.builder(chatModel).defaultAdvisors(new SimpleLoggerAdvisor()).build();
 
-        StateGraph stateGraph = new StateGraph(overAllState);
+        // new stateGraph
+        StateGraph stateGraph = new StateGraph({{stateSection}});
         // add nodes
-        // LlmNode llmNode = new LlmNode();
-        // stateGraph.addNode("llm", AsyncNodeAction.node_async(llmNode));
         {{nodeSection}}
-
         // add edges
-        // stateGraph.addEdge(START, "llm");
-        // stateGraph.addEdge("llm", END);
         {{edgeSection}}
         return stateGraph.compile();
     }

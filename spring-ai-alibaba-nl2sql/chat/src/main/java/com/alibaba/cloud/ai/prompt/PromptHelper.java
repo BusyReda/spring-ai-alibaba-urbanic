@@ -31,8 +31,7 @@ public class PromptHelper {
 
 	private static final List<String> DATE_TIME_TYPES = Arrays.asList("DATE", "TIME", "DATETIME", "TIMESTAMP");
 
-	public static String buildInitRewritePromptWithEvidence(String query, SchemaDTO schemaDTO,
-			List<String> evidenceList) {
+	public static String buildRewritePrompt(String query, SchemaDTO schemaDTO, List<String> evidenceList) {
 		StringBuilder dbContent = new StringBuilder();
 		dbContent.append("库名: 默认数据库, 包含以下表:\n");
 		for (TableDTO tableDTO : schemaDTO.getTable()) {
@@ -46,7 +45,7 @@ public class PromptHelper {
 		params.put("db_content", dbContent.toString());
 		params.put("evidence", evidence);
 		params.put("multi_turn", multiTurn.toString());
-		return PromptConstant.INIT_REWRITE_WITH_CLARIFY_AND_EVIDENCE_PROMPT_TEMPLATE.render(params);
+		return PromptConstant.INIT_REWRITE_PROMPT_TEMPLATE.render(params);
 	}
 
 	public static String buildMacSqlTablePrompt(TableDTO tableDTO) {
@@ -204,6 +203,26 @@ public class PromptHelper {
 		prompts.add(PromptConstant.MIX_SQL_GENERATOR_SYSTEM_PROMPT_TEMPLATE.render(params));
 		prompts.add(PromptConstant.MIX_SQL_GENERATOR_PROMPT_TEMPLATE.render(params));
 		return prompts;
+	}
+
+	public static String mixSqlGeneratorSystemCheckPrompt(String question, DbConfig dbConfig, SchemaDTO schemaDTO,
+			List<String> evidenceList) {
+		String evidence = StringUtils.join(evidenceList, ";\n");
+		String schemaInfo = buildMixMacSqlDbPrompt(schemaDTO, true);
+		String dialect = BizDataSourceTypeEnum.fromTypeName(dbConfig.getDialectType()).getDialect();
+		Map<String, Object> params = new HashMap<>();
+		params.put("dialect", dialect);
+		params.put("question", question);
+		params.put("schema_info", schemaInfo);
+		params.put("evidence", evidence);
+		return PromptConstant.MIX_SQL_GENERATOR_SYSTEM_PROMPT_CHECK_TEMPLATE.render(params);
+	}
+
+	public static String buildSemanticConsistenPrompt(String nlReq, String sql) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("nl_req", nlReq);
+		params.put("sql", sql);
+		return PromptConstant.SEMANTIC_CONSISTENC_PROMPT_TEMPLATE.render(params);
 	}
 
 }

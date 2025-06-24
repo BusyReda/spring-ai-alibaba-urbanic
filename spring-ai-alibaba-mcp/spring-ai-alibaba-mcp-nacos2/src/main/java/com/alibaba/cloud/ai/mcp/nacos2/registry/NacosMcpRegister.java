@@ -25,7 +25,6 @@ import com.alibaba.cloud.ai.mcp.nacos2.registry.model.ToolMetaInfo;
 import com.alibaba.cloud.ai.mcp.nacos2.registry.model.McpNacosConstant;
 import com.alibaba.cloud.ai.mcp.nacos2.registry.utils.JsonUtils;
 import com.alibaba.cloud.ai.mcp.nacos2.registry.utils.MD5Utils;
-import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
@@ -161,7 +160,7 @@ public class NacosMcpRegister implements ApplicationListener<WebServerInitialize
 			}
 			else {
 				ServiceRefInfo serviceRefInfo = new ServiceRefInfo();
-				serviceRefInfo.setNamespaceId(nacosMcpRegistryProperties.getServiceNamespace());
+				serviceRefInfo.setNamespaceId(nacosMcpProperties.getNamespace());
 				serviceRefInfo.setServiceName(this.serverInfo.name() + McpNacosConstant.SERVER_NAME_SUFFIX);
 				serviceRefInfo.setGroupName(nacosMcpRegistryProperties.getServiceGroup());
 				RemoteServerConfigInfo remoteServerConfigInfo = new RemoteServerConfigInfo();
@@ -280,7 +279,6 @@ public class NacosMcpRegister implements ApplicationListener<WebServerInitialize
 		try {
 			int port = event.getWebServer().getPort();
 			Properties nacosProperties = nacosMcpProperties.getNacosProperties();
-			nacosProperties.put(PropertyKeyConst.NAMESPACE, nacosMcpRegistryProperties.getServiceNamespace());
 			NamingService namingService = new NacosNamingService(nacosProperties);
 			Instance instance = new Instance();
 

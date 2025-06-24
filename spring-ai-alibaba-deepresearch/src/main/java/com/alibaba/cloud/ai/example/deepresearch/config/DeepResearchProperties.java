@@ -16,29 +16,46 @@
 
 package com.alibaba.cloud.ai.example.deepresearch.config;
 
-import com.alibaba.cloud.ai.example.deepresearch.model.BackgroundInvestigationType;
+import com.google.common.collect.Maps;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 /**
- * @author Allen Hu
- * @date 2025/5/24
+ * @author sixiyida
+ * @since 2025/6/14
  */
 @ConfigurationProperties(prefix = DeepResearchProperties.PREFIX)
 public class DeepResearchProperties {
 
-	public static final String PREFIX = "spring.ai.alibaba.deepreserch";
+	public static final String PREFIX = "spring.ai.alibaba.deepresearch";
 
 	/**
-	 * Set the type of background investigation node. Default is: just_web_search
+	 * Parallel node count, key=node name, value=node count
 	 */
-	private BackgroundInvestigationType backgroundInvestigationType = BackgroundInvestigationType.JUST_WEB_SEARCH;
+	private Map<String, Integer> parallelNodeCount = new HashMap<>();
 
-	public BackgroundInvestigationType getBackgroundInvestigationType() {
-		return backgroundInvestigationType;
+	/**
+	 * McpClient mapping for Agent name. key=Agent name, value=McpClient Name
+	 */
+	private Map<String, Set<String>> mcpClientMapping = Maps.newHashMap();
+
+	public Map<String, Integer> getParallelNodeCount() {
+		return parallelNodeCount;
 	}
 
-	public void setBackgroundInvestigationType(BackgroundInvestigationType backgroundInvestigationType) {
-		this.backgroundInvestigationType = backgroundInvestigationType;
+	public void setParallelNodeCount(Map<String, Integer> parallelNodeCount) {
+		this.parallelNodeCount = parallelNodeCount;
+	}
+
+	public Map<String, Set<String>> getMcpClientMapping() {
+		return mcpClientMapping;
+	}
+
+	public void setMcpClientMapping(Map<String, Set<String>> mcpClientMapping) {
+		this.mcpClientMapping = mcpClientMapping;
 	}
 
 }

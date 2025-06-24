@@ -31,14 +31,13 @@ import org.springframework.core.env.PropertyResolver;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.env.PropertySources;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.util.Collections.unmodifiableMap;
 
 /**
  * @author Sunrisea
@@ -48,15 +47,13 @@ public class NacosMcpProperties {
 
 	public static final String CONFIG_PREFIX = "spring.ai.alibaba.mcp.nacos";
 
-	public static final String DEFAULT_NAMESPACE = "public";
-
 	public static final String DEFAULT_ADDRESS = "127.0.0.1:8848";
 
 	private static final Pattern PATTERN = Pattern.compile("-(\\w)");
 
 	private static final Logger log = LoggerFactory.getLogger(NacosMcpProperties.class);
 
-	String namespace = DEFAULT_NAMESPACE;
+	String namespace;
 
 	String serverAddr;
 
@@ -75,6 +72,14 @@ public class NacosMcpProperties {
 	@Autowired
 	@JsonIgnore
 	private Environment environment;
+
+	public String getnamespace() {
+		return namespace;
+	}
+
+	public void setNamespace(String namespace) {
+		this.namespace = namespace;
+	}
 
 	public String getUsername() {
 		return username;
@@ -132,14 +137,6 @@ public class NacosMcpProperties {
 		this.serverAddr = serverAddr;
 	}
 
-	public String getNamespace() {
-		return namespace;
-	}
-
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
-	}
-
 	@PostConstruct
 	public void init() throws Exception {
 		if (StringUtils.isEmpty(this.ip)) {
@@ -149,12 +146,12 @@ public class NacosMcpProperties {
 
 	public Properties getNacosProperties() {
 		Properties properties = new Properties();
+		properties.put(PropertyKeyConst.NAMESPACE, Objects.toString(this.namespace, ""));
 		properties.put(PropertyKeyConst.SERVER_ADDR, Objects.toString(this.serverAddr, ""));
 		properties.put(PropertyKeyConst.USERNAME, Objects.toString(this.username, ""));
 		properties.put(PropertyKeyConst.PASSWORD, Objects.toString(this.password, ""));
 		properties.put(PropertyKeyConst.ACCESS_KEY, Objects.toString(this.accessKey, ""));
 		properties.put(PropertyKeyConst.SECRET_KEY, Objects.toString(this.secretKey, ""));
-		properties.put(PropertyKeyConst.NAMESPACE, Objects.toString(this.namespace, DEFAULT_NAMESPACE));
 		String endpoint = Objects.toString(this.endpoint, "");
 		if (endpoint.contains(":")) {
 			int index = endpoint.indexOf(":");
@@ -178,10 +175,8 @@ public class NacosMcpProperties {
 		if (environment == null) {
 			return;
 		}
-		String prefix = "spring.ai.alibaba.mcp.nacos";
-
 		ConfigurableEnvironment env = (ConfigurableEnvironment) environment;
-		Map<String, Object> properties = getSubProperties(env.getPropertySources(), env, prefix);
+		Map<String, Object> properties = getSubProperties(env.getPropertySources(), env, CONFIG_PREFIX);
 		properties.forEach((k, v) -> nacosConfigProperties.putIfAbsent(resolveKey(k), String.valueOf(v)));
 	}
 
@@ -203,7 +198,7 @@ public class NacosMcpProperties {
 		for (PropertySource<?> source : propertySources) {
 			for (String name : getPropertyNames(source)) {
 				if (!subProperties.containsKey(name) && name.startsWith(prefix)) {
-					String subName = name.substring(prefix.length());
+					String subName = name.substring(prefix.length() + 1);
 					if (!subProperties.containsKey(subName)) { // take first one
 						Object value = source.getProperty(name);
 						if (value instanceof String) {
@@ -214,7 +209,7 @@ public class NacosMcpProperties {
 				}
 			}
 		}
-		return unmodifiableMap(subProperties);
+		return Collections.unmodifiableMap(subProperties);
 	}
 
 	private String[] getPropertyNames(PropertySource propertySource) {

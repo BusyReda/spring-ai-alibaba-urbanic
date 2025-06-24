@@ -237,13 +237,43 @@ public final class OverAllState implements Serializable {
 	}
 
 	/**
+	 * Clears all data in the current state, leaving key strategies, resume flag, and
+	 * human feedback intact.
+	 */
+	public void clear() {
+		this.data.clear();
+	}
+
+	/**
+	 * Replaces the current state's contents with the provided state.
+	 * <p>
+	 * This method effectively copies all data, key strategies, resume flag, and human
+	 * feedback from the provided state to this state.
+	 * @param overAllState the state to copy from
+	 */
+	public void cover(OverAllState overAllState) {
+		this.keyStrategies.clear();
+		this.keyStrategies.putAll(overAllState.keyStrategies());
+		this.data.clear();
+		this.data.putAll(overAllState.data());
+		this.resume = overAllState.resume;
+		this.humanFeedback = overAllState.humanFeedback;
+	}
+
+	/**
 	 * Inputs over all state.
 	 * @param input the input
 	 * @return the over all state
 	 */
 	public OverAllState input(Map<String, Object> input) {
-		if (CollectionUtils.isEmpty(input))
+		if (input == null) {
+			withResume();
 			return this;
+		}
+
+		if (CollectionUtils.isEmpty(input)) {
+			return this;
+		}
 
 		Map<String, KeyStrategy> keyStrategies = keyStrategies();
 		input.keySet().stream().filter(key -> keyStrategies.containsKey(key)).forEach(key -> {
@@ -293,6 +323,23 @@ public final class OverAllState implements Serializable {
 			this.data.put(key, keyStrategies.get(key).apply(value(key, null), partialState.get(key)));
 		});
 		return data();
+	}
+
+	/**
+	 * Updates the internal state based on a schema-defined strategy.
+	 * <p>
+	 * This method first validates the input state, then updates the partial state
+	 * according to the provided key strategies. The updated state is formed by merging
+	 * the original state and the modified partial state, removing any null values in the
+	 * process. The resulting entries are then used to update the internal data map.
+	 * @param state the base state to update; must not be null
+	 * @param partialState the partial state containing updates; may be null or empty
+	 * @param keyStrategies the mapping of keys to update strategies; used to transform
+	 * values
+	 */
+	public void updateStateBySchema(Map<String, Object> state, Map<String, Object> partialState,
+			Map<String, KeyStrategy> keyStrategies) {
+		updateState(updateState(state, partialState, keyStrategies));
 	}
 
 	/**
@@ -424,8 +471,8 @@ public final class OverAllState implements Serializable {
 	 * Key strategies map.
 	 * @return the map
 	 */
-	public final Map<String, KeyStrategy> keyStrategies() {
-		return unmodifiableMap(keyStrategies);
+	public Map<String, KeyStrategy> keyStrategies() {
+		return keyStrategies;
 	}
 
 	/**
@@ -474,7 +521,7 @@ public final class OverAllState implements Serializable {
 	/**
 	 * The type Human feedback.
 	 */
-	public static class HumanFeedback {
+	public static class HumanFeedback implements Serializable {
 
 		private Map<String, Object> data;
 

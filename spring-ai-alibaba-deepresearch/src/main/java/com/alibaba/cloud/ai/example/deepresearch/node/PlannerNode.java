@@ -16,135 +16,75 @@
 
 package com.alibaba.cloud.ai.example.deepresearch.node;
 
-import com.alibaba.cloud.ai.example.deepresearch.model.Plan;
+import com.alibaba.cloud.ai.example.deepresearch.model.dto.Plan;
 import com.alibaba.cloud.ai.example.deepresearch.util.TemplateUtil;
 import com.alibaba.cloud.ai.graph.OverAllState;
 import com.alibaba.cloud.ai.graph.action.NodeAction;
+import com.alibaba.cloud.ai.graph.streaming.StreamingChatGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
-import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.SystemMessage;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.model.tool.ToolCallingChatOptions;
-import org.springframework.ai.template.st.StTemplateRenderer;
-import org.springframework.ai.tool.ToolCallback;
 import org.springframework.core.ParameterizedTypeReference;
-import reactor.core.publisher.Flux;
+import org.springframework.util.StringUtils;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.alibaba.cloud.ai.graph.StateGraph.END;
-import static org.springframework.ai.chat.memory.ChatMemory.CONVERSATION_ID;
+import java.util.Objects;
 
 /**
  * @author yingzi
  * @since 2025/5/18 16:47
  */
-
 public class PlannerNode implements NodeAction {
 
 	private static final Logger logger = LoggerFactory.getLogger(PlannerNode.class);
 
-	private final ChatClient chatClient;
-
-	private final ToolCallback[] toolCallbacks;
+	private final ChatClient plannerAgent;
 
 	private final BeanOutputConverter<Plan> converter;
 
-	private final InMemoryChatMemoryRepository chatMemoryRepository = new InMemoryChatMemoryRepository();
-
-	private final int MAX_MESSAGES = 100;
-
-	private final MessageWindowChatMemory messageWindowChatMemory = MessageWindowChatMemory.builder()
-		.chatMemoryRepository(chatMemoryRepository)
-		.maxMessages(MAX_MESSAGES)
-		.build();
-
-	public PlannerNode(ChatClient.Builder chatClientBuilder, ToolCallback[] toolCallbacks) {
-		this.chatClient = chatClientBuilder
-			.defaultAdvisors(MessageChatMemoryAdvisor.builder(messageWindowChatMemory).build())
-			.build();
-		this.toolCallbacks = toolCallbacks;
+	public PlannerNode(ChatClient plannerAgent) {
+		this.plannerAgent = plannerAgent;
 		this.converter = new BeanOutputConverter<>(new ParameterizedTypeReference<Plan>() {
 		});
 	}
 
 	@Override
 	public Map<String, Object> apply(OverAllState state) throws Exception {
-		logger.info("Planner node is running.");
-		List<Message> messages = TemplateUtil.applyPromptTemplate("planner", state);
-		Integer planIterations = state.value("plan_iterations", 0);
-		Integer maxStepNum = state.value("max_step_num", 3);
-		String threadId = state.value("thread_id", "__default__");
-
-		Boolean enableBackgroundInvestigation = state.value("enable_background_investigation", false);
-		ArrayList<String> backgroundInvestigationResults = state.value("background_investigation_results",
-				new ArrayList<>());
-
-		if (planIterations == 0 && enableBackgroundInvestigation && !backgroundInvestigationResults.isEmpty()) {
-			messages.add(SystemMessage.builder()
-				.text("background investigation results of user query:\n" + backgroundInvestigationResults + "\n")
-				.build());
+		logger.info("planner node is running.");
+		List<Message> messages = new ArrayList<>();
+		// 1. 添加消息
+		// 1.1 添加预置提示消息
+		messages.add(TemplateUtil.getMessage("planner", state));
+		// 1.2 添加用户提问
+		messages.add(new UserMessage(state.value("query", "")));
+		// 1.3 添加背景调查消息
+		String backgroundInvestigationResults = state.value("background_investigation_results", "");
+		if (StringUtils.hasText(backgroundInvestigationResults)) {
+			messages.add(new UserMessage(backgroundInvestigationResults));
 		}
-		String nextStep = "reporter";
-		Map<String, Object> updated = new HashMap<>();
-		if (planIterations > maxStepNum) {
-			updated.put("planner_next_node", nextStep);
-			return updated;
+		// 1.4 添加用户反馈消息
+		String feedBackContent = state.value("feed_back_content", "").toString();
+		if (StringUtils.hasText(feedBackContent)) {
+			messages.add(new UserMessage(feedBackContent));
 		}
 
-		Flux<String> StreamResult = chatClient.prompt(converter.getFormat())
-			.advisors(a -> a.param(CONVERSATION_ID, threadId))
-			.options(ToolCallingChatOptions.builder().toolCallbacks(toolCallbacks).build())
-			.messages(messages)
-			.stream()
-			.content();
+		logger.debug("messages: {}", messages);
+		// 2. 规划任务
+		var streamResult = plannerAgent.prompt(converter.getFormat()).messages(messages).stream().chatResponse();
 
-		String result = StreamResult.reduce((acc, next) -> acc + next).block();
-		logger.info("Planner response: {}", result);
-		assert result != null;
-		Plan curPlan = null;
-		try {
-			curPlan = converter.convert(result);
-			logger.info("反序列成功，convert: {}", curPlan);
-			if (curPlan.isHasEnoughContext()) {
-				logger.info("Planner response has enough context.");
-				updated.put("current_plan", curPlan);
-				updated.put("messages", new AssistantMessage(result));
-				updated.put("planner_next_node", nextStep);
-				return updated;
-			}
-		}
-		catch (Exception e) {
-			logger.error("反序列化失败");
-			if (planIterations > 0) {
-				updated.put("planner_next_node", nextStep);
-				return updated;
-			}
-			else {
-				nextStep = END;
-				updated.put("planner_next_node", nextStep);
-				return updated;
-			}
-		}
+		var generator = StreamingChatGenerator.builder()
+			.startingNode("planner_llm_stream")
+			.startingState(state)
+			.mapResult(response -> Map.of("planner_content",
+					Objects.requireNonNull(response.getResult().getOutput().getText())))
+			.build(streamResult);
 
-		nextStep = "human_feedback";
-		updated.put("current_plan", curPlan);
-		updated.put("messages", List.of(new AssistantMessage(result)));
-		updated.put("planner_next_node", nextStep);
-
-		return updated;
+		return Map.of("planner_content", generator);
 	}
 
 }

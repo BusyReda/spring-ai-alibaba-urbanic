@@ -18,16 +18,12 @@
         <url>https://github.com/alibaba/spring-ai-alibaba</url>
     </scm>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <dependencies>
 
         <dependency>
             <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-starter-tool-calling-common</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -52,18 +48,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
-    </dependencies>
 
-    <build>
-        <finalName>spring-ai-alibaba-starter-tool-calling-baidusearch</finalName>
-    </build>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

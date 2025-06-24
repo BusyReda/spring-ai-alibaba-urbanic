@@ -25,10 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Description;
 import org.springframework.http.HttpHeaders;
 
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
-
-import static com.alibaba.cloud.ai.toolcalling.common.CommonToolCallConstants.DEFAULT_USER_AGENTS;
 
 /**
  * @author 北极星
@@ -36,10 +33,11 @@ import static com.alibaba.cloud.ai.toolcalling.common.CommonToolCallConstants.DE
  */
 @Configuration
 @EnableConfigurationProperties(SerpApiProperties.class)
-@ConditionalOnProperty(prefix = SerpApiProperties.SERP_API_PREFIX, name = "enabled", havingValue = "true")
+@ConditionalOnProperty(prefix = SerpApiConstants.CONFIG_PREFIX, name = "enabled", havingValue = "true",
+		matchIfMissing = true)
 public class SerpApiAutoConfiguration {
 
-	@Bean
+	@Bean(name = SerpApiConstants.TOOL_NAME)
 	@ConditionalOnMissingBean
 	@Description("Use SerpApi search to query for the latest news.")
 	public SerpApiService serpApiSearch(JsonParseTool jsonParseTool, SerpApiProperties serpApiProperties) {

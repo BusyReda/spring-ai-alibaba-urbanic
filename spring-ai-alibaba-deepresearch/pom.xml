@@ -14,7 +14,6 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>3.4.5</spring-boot.version>
-        <lombok.version>1.18.32</lombok.version>
 
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <moditect-maven-plugin.version>1.2.0.Final</moditect-maven-plugin.version>
@@ -24,14 +23,22 @@
 
         <spring-ai.version>1.0.0</spring-ai.version>
         <spring-ai-alibaba.version>1.0.0.1-Urbanic</spring-ai-alibaba.version>
+        <openhtmltopdf.version>1.0.10</openhtmltopdf.version>
+        <commonmark.version>0.24.0</commonmark.version>
+
+        <!-- CheckStyle Maven Plugin -->
+        <maven-checkstyle-plugin.version>3.5.0</maven-checkstyle-plugin.version>
+        <maven-checkstyle-plugin.failsOnError>true</maven-checkstyle-plugin.failsOnError>
+        <maven-checkstyle-plugin.failOnViolation>true</maven-checkstyle-plugin.failOnViolation>
+        <puppycrawl-tools-checkstyle.version>9.3</puppycrawl-tools-checkstyle.version>
     </properties>
 
 
     <dependencies>
 
         <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-autoconfigure-model-openai</artifactId>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-autoconfigure-dashscope</artifactId>
         </dependency>
 
         <dependency>
@@ -55,21 +62,83 @@
         </dependency>
 
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-autoconfigure-model-tool</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-starter-tool-calling-tavilysearch</artifactId>
         </dependency>
-        
+
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>33.4.0-jre</version>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-starter-tool-calling-jinacrawler</artifactId>
+            <version>${spring-ai-alibaba.version}</version>
         </dependency>
-        
+
+        <dependency>
+            <groupId>org.apache.httpcomponents.core5</groupId>
+            <artifactId>httpcore5-h2</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-vector-store-elasticsearch</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-tika-document-reader</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-core</artifactId>
+            <version>${openhtmltopdf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-pdfbox</artifactId>
+            <version>${openhtmltopdf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-slf4j</artifactId>
+            <version>${openhtmltopdf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.commonmark</groupId>
+            <artifactId>commonmark</artifactId>
+            <version>${commonmark.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.commonmark</groupId>
+            <artifactId>commonmark-ext-gfm-tables</artifactId>
+            <version>${commonmark.version}</version>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -190,7 +259,53 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${maven-checkstyle-plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.puppycrawl.tools</groupId>
+                        <artifactId>checkstyle</artifactId>
+                        <version>${puppycrawl-tools-checkstyle.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <consoleOutput>true</consoleOutput>
+                    <configLocation>../tools/src/checkstyle/checkstyle.xml</configLocation>
+                    <headerLocation>../tools/src/checkstyle/checkstyle-header.txt</headerLocation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.44.5</version>
+                <configuration>
+                    <java>
+                        <removeUnusedImports/>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>spotless-apply</id>
+                        <goals>
+                            <goal>apply</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
-    
+
 </project>

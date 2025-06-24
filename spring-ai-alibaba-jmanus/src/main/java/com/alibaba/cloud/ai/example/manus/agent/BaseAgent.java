@@ -50,8 +50,9 @@ import java.util.*;
  * <ul>
  * <li>{@link #getName()} - Returns the agent's name</li>
  * <li>{@link #getDescription()} - Returns the agent's description</li>
- * <li>{@link #addThinkPrompt(List)} - Implements the thinking chain logic</li>
- * <li>{@link #getNextStepMessage()} - Provides the next step's prompt template</li>
+ * <li>{@link #getThinkMessage()} - Implements the thinking chain logic</li>
+ * <li>{@link #getNextStepWithEnvMessage()} - Provides the next step's prompt
+ * template</li>
  * <li>{@link #step()} - Implements the core logic for each execution step</li>
  * </ul>
  *
@@ -111,10 +112,9 @@ public abstract class BaseAgent {
 	 * 返回添加的系统提示消息对象
 	 *
 	 * 子类实现参考： 1. ReActAgent: 实现基础的思考-行动循环提示 2. ToolCallAgent: 添加工具选择和执行相关的提示
-	 * @param messages 当前的消息列表，用于构建上下文
 	 * @return 添加的系统提示消息对象
 	 */
-	protected Message addThinkPrompt(List<Message> messages) {
+	protected Message getThinkMessage() {
 		// 获取操作系统信息
 		String osName = System.getProperty("os.name");
 		String osVersion = System.getProperty("os.version");
@@ -122,6 +122,21 @@ public abstract class BaseAgent {
 
 		// 获取当前日期时间，格式为yyyy-MM-dd
 		String currentDateTime = java.time.LocalDate.now().toString(); // 格式为yyyy-MM-dd
+		boolean isDebugModel = manusProperties.getBrowserDebug();
+		String detailOutput = "";
+		if (isDebugModel) {
+			detailOutput = """
+					1. 使用工具调用时，必须给出解释说明，说明使用这个工具的理由和背后的思考
+					2. 简述过去的所有步骤已经都做了什么事
+					""";
+		}
+		else {
+			detailOutput = """
+					1. 使用工具调用时，不需要额外的任何解释说明！
+					2. 不要在工具调用前提供推理或描述！
+					""";
+
+		}
 
 		String stepPrompt = """
 				- SYSTEM INFORMATION:
@@ -139,19 +154,16 @@ public abstract class BaseAgent {
 				{extraParams}
 
 				重要说明：
-				1. 使用工具调用时，不需要额外的任何解释说明！
-				2. 不要在工具调用前提供推理或描述！
+				%s
 				3. 做且只做当前要做的步骤要求中的内容
 				4. 如果当前要做的步骤要求已经做完，则调用terminate工具来完成当前步骤。
 				5. 全局目标 是用来有个全局认识的，不要在当前步骤中去完成这个全局目标。
 
-				""".formatted(osName, osVersion, osArch, currentDateTime);
+				""".formatted(osName, osVersion, osArch, currentDateTime, detailOutput);
 
 		SystemPromptTemplate promptTemplate = new SystemPromptTemplate(stepPrompt);
 
 		Message systemMessage = promptTemplate.createMessage(getInitSettingData());
-
-		messages.add(systemMessage);
 		return systemMessage;
 	}
 
