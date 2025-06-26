@@ -20,7 +20,7 @@
 
     <groupId>com.mayfair.infra</groupId>
     <artifactId>spring-ai-alibaba-bom</artifactId>
-    <version>1.0.0.1-Urbanic</version>
+    <version>1.0.0.2-Urbanic-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 

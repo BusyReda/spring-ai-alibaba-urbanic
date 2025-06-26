@@ -172,13 +172,13 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-starter-tool-calling-tavilysearch</artifactId>
             <version>${revision}</version>
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba.cloud.ai</groupId>
+            <groupId>com.mayfair.infra</groupId>
             <artifactId>spring-ai-alibaba-starter-tool-calling-baidusearch</artifactId>
             <version>${revision}</version>
         </dependency>
