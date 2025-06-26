@@ -1,16 +1,18 @@
 package com.alibaba.cloud.ai.transformer.splitter;
 
-import io.micrometer.common.util.StringUtils;
-import lombok.Builder;
-import lombok.Data;
-import org.springframework.ai.transformer.splitter.TextSplitter;
-
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.springframework.ai.transformer.splitter.TextSplitter;
+
+import io.micrometer.common.util.StringUtils;
+import lombok.Builder;
+import lombok.Data;
+
 public class MarkdownHeaderTextSplitter extends TextSplitter {
+
     // 标题匹配正则：匹配 # 开头的标题
     private static final Pattern HEADER_PATTERN = Pattern.compile("^(#{1,6})\\s+(.+)$", Pattern.MULTILINE);
 
