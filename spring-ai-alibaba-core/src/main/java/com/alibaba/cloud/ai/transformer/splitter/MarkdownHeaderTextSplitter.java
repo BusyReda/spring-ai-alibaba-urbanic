@@ -85,6 +85,13 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
      */
     @Override
     protected List<String> splitText(String text) {
+        return splitText(text, null);
+    }
+
+    /**
+     * 主要的分割方法，支持传入原始metadata
+     */
+    public List<String> splitText(String text, Map<String, Object> originalMetadata) {
         if (StringUtils.isBlank(text)) {
             return Collections.emptyList();
         }
@@ -94,7 +101,7 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
             List<HeaderInfo> headers = parseHeaders(text);
 
             // 2. 按配置的标题级别分割
-            List<DocumentChunk> chunks = splitByHeaders(text, headers);
+            List<DocumentChunk> chunks = splitByHeaders(text, headers, originalMetadata);
 
             // 3. 处理过长的chunk
             if (config.isAutoSubdivide()) {
@@ -155,7 +162,9 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
     /**
      * 根据标题进行分割
      */
-    private List<DocumentChunk> splitByHeaders(String text, List<HeaderInfo> headers) {
+    private List<DocumentChunk> splitByHeaders(String text,
+            List<HeaderInfo> headers,
+            Map<String, Object> originalMetadata) {
         List<DocumentChunk> chunks = new ArrayList<>();
 
         // 过滤出符合分割级别的标题
@@ -167,7 +176,7 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
                     .title("文档内容")
                     .content(text.trim())
                     .level(0)
-                    .metadata(new HashMap<>())
+                    .metadata(inheritMetadata(originalMetadata))
                     .build());
             return chunks;
         }
@@ -188,7 +197,7 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
                         .headerPath(config.isIncludeHeaderPath() ? currentHeader.getFullPath() : null)
                         .content(chunkContent)
                         .level(currentHeader.getLevel())
-                        .metadata(createMetadata(currentHeader))
+                        .metadata(inheritMetadata(originalMetadata))
                         .build();
 
                 chunks.add(chunk);
@@ -238,11 +247,12 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
                 .includeHeaderPath(config.isIncludeHeaderPath())
                 .headerPathMode(config.getHeaderPathMode())
                 .includeContextualTitle(config.isIncludeContextualTitle())
+                .inheritOriginalMetadata(config.isInheritOriginalMetadata())
                 .autoSubdivide(false) // 避免递归
                 .build();
 
         MarkdownHeaderTextSplitter subSplitter = new MarkdownHeaderTextSplitter(subConfig);
-        List<String> subTexts = subSplitter.splitText(chunk.getContent());
+        List<String> subTexts = subSplitter.splitText(chunk.getContent(), chunk.getMetadata());
 
         if (subTexts.size() <= 1) {
             return Collections.singletonList(chunk);
@@ -304,16 +314,13 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
     }
 
     /**
-     * 创建元数据
+     * 继承原始metadata
      */
-    private Map<String, Object> createMetadata(HeaderInfo header) {
-        Map<String, Object> metadata = new HashMap<>();
-        metadata.put("title", header.getTitle());
-        metadata.put("level", header.getLevel());
-        metadata.put("header_path", header.getFullPath());
-        metadata.put("parent_path", header.getParentPath());
-        metadata.put("splitter", "MarkdownHeaderTextSplitter");
-        return metadata;
+    private Map<String, Object> inheritMetadata(Map<String, Object> originalMetadata) {
+        if (!config.isInheritOriginalMetadata() || originalMetadata == null || originalMetadata.isEmpty()) {
+            return new HashMap<>();
+        }
+        return new HashMap<>(originalMetadata);
     }
 
     /**
@@ -346,6 +353,13 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
     }
 
     /**
+     * 降级分割策略（保持向后兼容）
+     */
+    private List<String> fallbackSplit(String text, Map<String, Object> originalMetadata) {
+        return fallbackSplit(text);
+    }
+
+    /**
      * 分割配置
      */
     @Data
@@ -375,6 +389,9 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
 
         @Builder.Default
         private boolean includeContextualTitle = true; // 是否包含上下文标题
+
+        @Builder.Default
+        private boolean inheritOriginalMetadata = true; // 是否继承原始文档的metadata
 
     }
 
@@ -429,9 +446,9 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
     }
 
     /**
-     * 分割文本并返回DocumentChunk对象列表（提供更多控制选项）
+     * 分割文本并返回DocumentChunk对象列表
      */
-    public List<DocumentChunk> splitToChunks(String text) {
+    public List<DocumentChunk> splitToChunks(String text, Map<String, Object> originalMetadata) {
         if (StringUtils.isBlank(text)) {
             return Collections.emptyList();
         }
@@ -441,7 +458,7 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
             List<HeaderInfo> headers = parseHeaders(text);
 
             // 2. 按配置的标题级别分割
-            List<DocumentChunk> chunks = splitByHeaders(text, headers);
+            List<DocumentChunk> chunks = splitByHeaders(text, headers, originalMetadata);
 
             // 3. 处理过长的chunk
             if (config.isAutoSubdivide()) {
@@ -459,7 +476,7 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
                     .title("文档内容")
                     .content(text.trim())
                     .level(0)
-                    .metadata(new HashMap<>())
+                    .metadata(inheritMetadata(originalMetadata))
                     .build());
         }
     }
@@ -467,15 +484,19 @@ public class MarkdownHeaderTextSplitter extends TextSplitter {
     /**
      * 获取纯净内容列表（最适合向量化）
      */
-    public List<String> splitToPureContent(String text) {
-        return splitToChunks(text).stream().map(DocumentChunk::getContent).collect(Collectors.toList());
+    public List<String> splitToPureContent(String text, Map<String, Object> originalMetadata) {
+        return splitToChunks(text, originalMetadata).stream()
+                .map(DocumentChunk::getContent)
+                .collect(Collectors.toList());
     }
 
     /**
      * 获取带简单标题的内容列表
      */
-    public List<String> splitToContentWithTitle(String text) {
-        return splitToChunks(text).stream().map(this::formatChunkWithTitle).collect(Collectors.toList());
+    public List<String> splitToContentWithTitle(String text, Map<String, Object> originalMetadata) {
+        return splitToChunks(text, originalMetadata).stream()
+                .map(this::formatChunkWithTitle)
+                .collect(Collectors.toList());
     }
 
     /**
