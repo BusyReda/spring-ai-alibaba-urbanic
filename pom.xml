@@ -350,7 +350,7 @@
                         <goals>
                             <goal>validate</goal>
                         </goals>
-                        <phase>validate</phase>
+                        <phase>initialize</phase>
                         <inherited>true</inherited>
                     </execution>
                 </executions>
