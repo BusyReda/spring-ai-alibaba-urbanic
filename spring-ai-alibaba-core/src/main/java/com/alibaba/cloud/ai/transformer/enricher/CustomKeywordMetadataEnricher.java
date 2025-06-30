@@ -11,11 +11,12 @@ import org.springframework.ai.document.DocumentTransformer;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import lombok.Getter;
+
 /**
  * 关键词元数据增强器 使用生成式AI模型从文档内容中提取关键词并添加到元数据中
- *
- * @author 阿里云AI团队
  */
+@Getter
 public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 
     /**
@@ -146,30 +147,6 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 
         // 去除前后空格和换行符
         return keywords.trim().replaceAll("\\s+", " ");
-    }
-
-    /**
-     * 获取关键词数量
-     * @return 关键词数量
-     */
-    public int getKeywordCount() {
-        return keywordCount;
-    }
-
-    /**
-     * 获取关键词模板
-     * @return 关键词模板
-     */
-    public String getKeywordsTemplate() {
-        return keywordsTemplate;
-    }
-
-    /**
-     * 获取关键词元数据键名
-     * @return 关键词元数据键名
-     */
-    public String getKeywordsMetadataKey() {
-        return keywordsMetadataKey;
     }
 
     /**
