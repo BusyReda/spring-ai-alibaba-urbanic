@@ -9,6 +9,7 @@ import org.springframework.ai.document.DocumentTransformer;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -140,11 +141,8 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 		// 调用AI模型提取关键词
 		String keywords = this.chatModel.call(prompt).getResult().getOutput().getText();
 
-		// 清理关键词字符串（去除多余的空格和换行）
-		String cleanedKeywords = cleanKeywords(keywords);
-
 		// 将关键词添加到文档元数据中
-		document.getMetadata().put(this.keywordsMetadataKey, cleanedKeywords);
+		document.getMetadata().put(this.keywordsMetadataKey, cleanKeywords(keywords));
 	}
 
 	/**
@@ -152,13 +150,15 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 	 * @param keywords 原始关键词字符串
 	 * @return 清理后的关键词字符串
 	 */
-	private String cleanKeywords(String keywords) {
+	private List<String> cleanKeywords(String keywords) {
 		if (!StringUtils.hasText(keywords)) {
-			return "";
+			return new ArrayList<>();
 		}
-
-		// 去除前后空格和换行符
-		return keywords.trim().replaceAll("\\s+", " ");
+		String[] keywordList = keywords.split(",");
+		if (keywordList.length == 0) {
+			return new ArrayList<>();
+		}
+		return List.of(keywordList);
 	}
 
 	/**
