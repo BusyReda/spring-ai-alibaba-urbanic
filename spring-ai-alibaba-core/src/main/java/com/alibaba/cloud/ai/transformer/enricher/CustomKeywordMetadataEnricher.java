@@ -23,12 +23,16 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 	 */
 	public static final String CONTEXT_STR_PLACEHOLDER = "context_str";
 
+	public static final String KEYWORD_MIN_COUNT_PLACEHOLDER = "min_key_word_count";
+
+	public static final String KEYWORD_MAX_COUNT_PLACEHOLDER = "max_key_word_count";
+
 	/**
 	 * 默认的关键词提取提示模板
 	 */
 	public static final String DEFAULT_KEYWORDS_TEMPLATE = """
-			{context_str}. Give %s unique keywords for this
-			document. Format as comma separated. Keywords: """;
+			文档内容：{context_str}. 请针对文档内容总结若干关键词，每个关键词包含2-6个字符，提取的关键词数量为{min_key_word_count}个到{max_key_word_count}个。
+			请用英文逗号分隔每个关键词并返回，例如：关键词1,关键词2,关键词3。""";
 
 	/**
 	 * 默认的关键词元数据键名
@@ -43,7 +47,9 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 	/**
 	 * 要提取的关键词数量
 	 */
-	private final int keywordCount;
+	private final int minKeywordCount;
+
+	private final int maxKeywordCount;
 
 	/**
 	 * 关键词提取的提示模板
@@ -58,38 +64,44 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 	/**
 	 * 使用默认配置的构造函数
 	 * @param chatModel AI聊天模型
-	 * @param keywordCount 要提取的关键词数量
+	 * @param minKeywordCount 要提取的关键词数量下限
+	 * @param maxKeywordCount 要提取的关键词数量上限
 	 */
-	public CustomKeywordMetadataEnricher(ChatModel chatModel, int keywordCount) {
-		this(chatModel, keywordCount, DEFAULT_KEYWORDS_TEMPLATE, DEFAULT_KEYWORDS_METADATA_KEY);
+	public CustomKeywordMetadataEnricher(ChatModel chatModel, int minKeywordCount, int maxKeywordCount) {
+		this(chatModel, minKeywordCount, maxKeywordCount, DEFAULT_KEYWORDS_TEMPLATE, DEFAULT_KEYWORDS_METADATA_KEY);
 	}
 
 	/**
 	 * 指定元数据键名的构造函数
 	 * @param chatModel AI聊天模型
-	 * @param keywordCount 要提取的关键词数量
+	 * @param minKeywordCount 要提取的关键词数量下限
+	 * @param maxKeywordCount 要提取的关键词数量上限
 	 * @param keywordsMetadataKey 存储关键词的元数据键名
 	 */
-	public CustomKeywordMetadataEnricher(ChatModel chatModel, int keywordCount, String keywordsMetadataKey) {
-		this(chatModel, keywordCount, DEFAULT_KEYWORDS_TEMPLATE, keywordsMetadataKey);
+	public CustomKeywordMetadataEnricher(ChatModel chatModel, int minKeywordCount, int maxKeywordCount,
+			String keywordsMetadataKey) {
+		this(chatModel, minKeywordCount, maxKeywordCount, DEFAULT_KEYWORDS_TEMPLATE, keywordsMetadataKey);
 	}
 
 	/**
 	 * 完全自定义的构造函数
 	 * @param chatModel AI聊天模型
-	 * @param keywordCount 要提取的关键词数量
+	 * @param minKeywordCount 要提取的关键词数量的下限
+	 * @param maxKeywordCount 要提取的关键词数量的上限
 	 * @param keywordsTemplate 关键词提取的提示模板
 	 * @param keywordsMetadataKey 存储关键词的元数据键名
 	 */
-	public CustomKeywordMetadataEnricher(ChatModel chatModel, int keywordCount, String keywordsTemplate,
-			String keywordsMetadataKey) {
+	public CustomKeywordMetadataEnricher(ChatModel chatModel, int minKeywordCount, int maxKeywordCount,
+			String keywordsTemplate, String keywordsMetadataKey) {
 		Assert.notNull(chatModel, "ChatModel must not be null");
-		Assert.isTrue(keywordCount >= 1, "Keyword count must be >= 1");
+		Assert.isTrue(maxKeywordCount >= 1, "Keyword count must be >= 1");
+		Assert.isTrue(maxKeywordCount <= 20, "Keyword count must be <= 20");
 		Assert.hasText(keywordsTemplate, "Keywords template must not be empty");
 		Assert.hasText(keywordsMetadataKey, "Keywords metadata key must not be empty");
 
 		this.chatModel = chatModel;
-		this.keywordCount = keywordCount;
+		this.minKeywordCount = minKeywordCount;
+		this.maxKeywordCount = maxKeywordCount;
 		this.keywordsTemplate = keywordsTemplate;
 		this.keywordsMetadataKey = keywordsMetadataKey;
 	}
@@ -118,11 +130,12 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 		}
 
 		// 创建提示模板
-		String formattedTemplate = String.format(this.keywordsTemplate, this.keywordCount);
-		PromptTemplate template = new PromptTemplate(formattedTemplate);
+		PromptTemplate template = new PromptTemplate(this.keywordsTemplate);
 
 		// 创建提示
-		Prompt prompt = template.create(Map.of(CONTEXT_STR_PLACEHOLDER, document.getText()));
+		Prompt prompt = template
+			.create(Map.of(CONTEXT_STR_PLACEHOLDER, document.getText(), KEYWORD_MIN_COUNT_PLACEHOLDER,
+					this.minKeywordCount, KEYWORD_MAX_COUNT_PLACEHOLDER, this.maxKeywordCount));
 
 		// 调用AI模型提取关键词
 		String keywords = this.chatModel.call(prompt).getResult().getOutput().getText();
@@ -164,7 +177,9 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 
 		private final ChatModel chatModel;
 
-		private int keywordCount = 5; // 默认提取5个关键词
+		private int maxKeywordCount = 5; // 默认提取5个关键词
+
+		private int minKeywordCount = 3; // 默认提取3个关键词
 
 		private String keywordsTemplate = DEFAULT_KEYWORDS_TEMPLATE;
 
@@ -177,12 +192,23 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 
 		/**
 		 * 设置关键词数量
-		 * @param keywordCount 关键词数量
+		 * @param minKeywordCount 关键词数量
 		 * @return builder实例
 		 */
-		public KeywordMetadataEnricherBuilder keywordCount(int keywordCount) {
-			Assert.isTrue(keywordCount >= 1, "Keyword count must be >= 1");
-			this.keywordCount = keywordCount;
+		public KeywordMetadataEnricherBuilder minKeywordCount(int minKeywordCount) {
+			Assert.isTrue(minKeywordCount >= 1, "Keyword count must be >= 1");
+			this.minKeywordCount = minKeywordCount;
+			return this;
+		}
+
+		/**
+		 * 设置关键词数量
+		 * @param maxKeywordCount 关键词数量
+		 * @return builder实例
+		 */
+		public KeywordMetadataEnricherBuilder maxKeywordCount(int maxKeywordCount) {
+			Assert.isTrue(maxKeywordCount <= 20, "Keyword count must be <= 20");
+			this.maxKeywordCount = maxKeywordCount;
 			return this;
 		}
 
@@ -213,7 +239,8 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 		 * @return KeywordMetadataEnricher实例
 		 */
 		public CustomKeywordMetadataEnricher build() {
-			return new CustomKeywordMetadataEnricher(chatModel, keywordCount, keywordsTemplate, keywordsMetadataKey);
+			return new CustomKeywordMetadataEnricher(chatModel, minKeywordCount, maxKeywordCount, keywordsTemplate,
+					keywordsMetadataKey);
 		}
 
 	}
