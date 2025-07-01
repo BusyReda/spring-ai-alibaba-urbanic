@@ -32,7 +32,14 @@ public class CustomKeywordMetadataEnricher implements DocumentTransformer {
 	 * 默认的关键词提取提示模板
 	 */
 	public static final String DEFAULT_KEYWORDS_TEMPLATE = """
-			文档内容：{context_str}. 请针对文档内容总结若干关键词，每个关键词包含2-6个字符，提取的关键词数量为{min_key_word_count}个到{max_key_word_count}个。
+			文档内容:{context_str}.请针对文档内容总结若干关键词，每个关键词包含2-6个字符。
+			需要遵循如下规则：
+			1.提取的关键词数量为{min_key_word_count}个到{max_key_word_count}个。
+			2.重点关注具有业务属性的名词，主要词语语义的连贯性
+			3.移除停用词（的、是、在、有、等、如何）
+			4.可以进行适当的同义词扩展
+			5.不要特别关注通用的，没有业务含义的词语，比如：'说明'、'定义'等
+			6.关键词的语种和文档内容语种保持一致
 			请用英文逗号分隔每个关键词并返回，例如：关键词1,关键词2,关键词3。""";
 
 	/**
